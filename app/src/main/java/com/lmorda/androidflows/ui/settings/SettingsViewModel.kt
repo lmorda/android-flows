@@ -15,11 +15,13 @@ class SettingsViewModel @Inject constructor(
     private val userDataRepository: UserDataRepository
 ) : ViewModel() {
 
+    // Use a StateFlow for Compose because it's hot and it always has the last value
     private val _user = MutableStateFlow(User("", ""))
     val user: StateFlow<User> = _user
 
     init {
         viewModelScope.launch {
+            // Emit the initial value on the hot StateFlow
             _user.value = userDataRepository.getUser()
         }
     }

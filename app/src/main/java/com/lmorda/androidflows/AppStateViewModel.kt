@@ -13,7 +13,8 @@ class AppStateViewModel @Inject constructor(
     repository: VitalSignsRepository
 ) : ViewModel() {
 
-    val errorMessages: SharedFlow<String> = repository.errorFlow
+    // Use a hot flow to broadcast errors immediately to multiple consumers
+    val errorMessages: SharedFlow<String> = repository.errorMessageFlow
 
     init {
         viewModelScope.launch {
