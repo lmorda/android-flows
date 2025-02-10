@@ -11,50 +11,71 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class VitalSignsViewModel @Inject constructor(
-    repository: VitalSignsRepository,
+    vitalSignsRepository: VitalSignsRepository,
     private val userRepository: UserDataRepository
 ) : ViewModel() {
 
-    private val _user = MutableStateFlow(User("", ""))
-    val user: StateFlow<User> = _user
+    private val user = MutableStateFlow(User("", ""))
 
-    fun getUser() {
+    init {
         viewModelScope.launch {
-            _user.value = userRepository.getUser()
+            user.value = userRepository.getUser()
         }
     }
 
-    val latestVitalSigns: StateFlow<VitalSignsEntity?> =
-        repository.getLatestVitalSigns().stateIn(
+    private val latestVitalSigns: StateFlow<VitalSignsEntity?> =
+        vitalSignsRepository.getLatestVitalSigns().stateIn(
             scope = viewModelScope,
             started = SharingStarted.Lazily,
             initialValue = null
         )
 
-    val averageHeartRate: StateFlow<Double?> =
-        repository.getAvgHeartRateToday().stateIn(
+    private val averageHeartRate: StateFlow<Double?> =
+        vitalSignsRepository.getAvgHeartRateToday().stateIn(
             scope = viewModelScope,
             started = SharingStarted.Lazily,
             initialValue = null
         )
 
-    val averageBloodPressure: StateFlow<AverageBloodPressure?> =
-        repository.getAvgBloodPressureToday().stateIn(
+    private val averageBloodPressure: StateFlow<AverageBloodPressure?> =
+        vitalSignsRepository.getAvgBloodPressureToday().stateIn(
             scope = viewModelScope,
             started = SharingStarted.Lazily,
             initialValue = null
         )
 
-    val vitalSignsHistory: StateFlow<List<VitalSignsEntity>> = repository.getAllVitalSigns()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Lazily,
-            initialValue = emptyList()
+    private val vitalSignsHistory: StateFlow<List<VitalSignsEntity>> =
+        vitalSignsRepository.getAllVitalSigns()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Lazily,
+                initialValue = emptyList()
+            )
+
+    val state: StateFlow<VitalSignsUiState> = combine(
+        user,
+        latestVitalSigns,
+        averageHeartRate,
+        averageBloodPressure,
+        vitalSignsHistory
+    ) { user, latest, heartRate, bloodPressure, history ->
+        VitalSignsUiState(
+            user = user,
+            latestVitalSigns = latest,
+            averageHeartRate = heartRate,
+            averageBloodPressure = bloodPressure,
+            vitalSignsHistory = history
         )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = VitalSignsUiState()
+    )
 }

@@ -16,8 +16,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,16 +37,9 @@ import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
 
 @Composable
 internal fun VitalSignsScreen(
-    viewModel: VitalSignsViewModel,
+    state: VitalSignsUiState,
     navigateToSettings: () -> Unit,
 ) {
-    val user by viewModel.user.collectAsState()
-    viewModel.getUser()
-
-    val latestVitalSigns by viewModel.latestVitalSigns.collectAsState()
-    val averageHeartRate by viewModel.averageHeartRate.collectAsState()
-    val averageBloodPressure by viewModel.averageBloodPressure.collectAsState()
-    val vitalSignsHistory by viewModel.vitalSignsHistory.collectAsState()
 
     Column(
         modifier = Modifier
@@ -60,7 +51,7 @@ internal fun VitalSignsScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "${user.firstName} ${user.lastName}",
+                text = "${state.user?.firstName} ${state.user?.lastName}",
                 style = MaterialTheme.typography.headlineSmall,
             )
             Icon(
@@ -73,11 +64,11 @@ internal fun VitalSignsScreen(
             )
         }
         Spacer(modifier = Modifier.height(36.dp))
-        CurrentVitals(latestVitalSigns = latestVitalSigns)
+        CurrentVitals(latestVitalSigns = state.latestVitalSigns)
         Spacer(modifier = Modifier.height(48.dp))
-        DailyAverage(averageHeartRate, averageBloodPressure)
+        DailyAverage(state.averageHeartRate, state.averageBloodPressure)
         Spacer(modifier = Modifier.height(48.dp))
-        HeartRate(vitalSignsHistory)
+        HeartRate(state.vitalSignsHistory)
     }
 }
 

@@ -16,13 +16,14 @@ class SettingsViewModel @Inject constructor(
 ) : ViewModel() {
 
     // Use a StateFlow for Compose because it's hot and it always has the last value
-    private val _user = MutableStateFlow(User("", ""))
-    val user: StateFlow<User> = _user
+    private val _state =
+        MutableStateFlow(SettingsUiState(user = User(firstName = "", lastName = "")))
+    val state: StateFlow<SettingsUiState> = _state
 
     init {
         viewModelScope.launch {
             // Emit the initial value on the hot StateFlow
-            _user.value = userDataRepository.getUser()
+            _state.value = SettingsUiState(user = userDataRepository.getUser())
         }
     }
 
