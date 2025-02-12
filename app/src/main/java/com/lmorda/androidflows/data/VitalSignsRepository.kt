@@ -29,8 +29,8 @@ class VitalSignsRepository @Inject constructor(
     fun getAvgBloodPressureToday() = dao.getAverageBloodPressureForToday()
 
     // Dispatch onto the IO thread
-    fun getVitals() {
-        CoroutineScope(Dispatchers.IO).launch {
+    fun getVitals(scope: CoroutineScope) {
+        scope.launch(Dispatchers.IO) {
             // Cold flow to fetch heart rate and blood pressure data from the fake data source, only fetched when needed
             dataSource.getVitalSigns()
                 // Catch errors, emit on the error hot flow, and retry

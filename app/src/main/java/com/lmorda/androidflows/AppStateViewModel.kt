@@ -2,6 +2,7 @@ package com.lmorda.androidflows
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.lmorda.androidflows.data.VitalSignsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharedFlow
@@ -17,9 +18,7 @@ class AppStateViewModel @Inject constructor(
     val errorMessages: SharedFlow<String> = repository.errorMessageFlow
 
     init {
-        viewModelScope.launch {
-            repository.getVitals()
-        }
+        repository.getVitals(viewModelScope)
     }
 
 }
